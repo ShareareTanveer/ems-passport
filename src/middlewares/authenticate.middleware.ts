@@ -1,5 +1,6 @@
-import express from 'express';
+import express, { NextFunction } from 'express';
 import httpStatusCodes from 'http-status-codes';
+import { getRepository } from 'typeorm';
 
 // Services
 import userService from '../services/user/user.service';
@@ -14,6 +15,11 @@ import ApiUtility from '../utilities/api.utility';
 
 // Constants
 import constants from '../constants';
+
+// entity
+import { User } from '../entities/user/user.entity';
+import { Permission } from '../entities/user/permission.entity';
+
 
 export default async (
   req: IRequest,
@@ -44,4 +50,39 @@ export default async (
   }
 
   next();
+};
+
+
+export const checkPermission = (action: string, modelName: string) => {
+  return async (req: any, res: any, next: NextFunction) => {
+      const userRepository = getRepository(User);
+      const permissionRepository = getRepository(Permission);
+
+      try {
+          const user = await userRepository.findOne(req.user.id, { relations: ['role', 'role.permissions'] });
+
+          if (!user) {
+              return res.status(403).json({ message: 'Unauthorized: User not found' });
+          }
+
+          const permission = await permissionRepository.findOne({ where: { codename: `${action}_${modelName}` } });
+
+          console.log("user",user)
+          console.log("permission",permission)
+          if (!permission) {
+              return res.status(403).json({ message: 'Unauthorized: Permission not found' });
+          }
+
+          const hasPermission = user.role.permissions.some(p => p.codename === `${action}_${modelName}`);
+          console.log(hasPermission)
+          if (hasPermission) {
+              next();
+          } else {
+              res.status(403).json({ message: 'Unauthorized: Insufficient permissions' });
+          }
+      } catch (error) {
+          console.error('Error checking permission:', error);
+          res.status(500).json({ message: 'Internal Server Error' });
+      }
+  };
 };

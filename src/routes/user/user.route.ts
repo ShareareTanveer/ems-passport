@@ -9,36 +9,22 @@ import userSchema from '../../validations/schemas/user.schema';
 
 // Middleware
 import { isAdmin } from '../../middlewares/permission-handler.middleware';
+import { checkPermission } from '../../middlewares/authenticate.middleware';
 
 const router = express.Router();
 
-  /**
-   * @openapi
-   * /healthcheck:
-   *  get:
-   *     tags:
-   *     - Healthcheck
-   *     description: Responds if the app is up and running
-   *     responses:
-   *       200:
-   *         description: App is up and running
-   */
 router.get(
   '/',
+  checkPermission("read","user"),
   userController.list,
 );
 
-  /**
-   * @openapi
-   * /healthcheck:
-   *  get:
-   *     tags:
-   *     - Healthcheck
-   *     description: Responds if the app is up and running
-   *     responses:
-   *       200:
-   *         description: App is up and running
-   */
+router.get(
+  '/:id',
+  checkPermission("read","user"),
+  userController.detail,
+);
+
 router.delete(
   '/:id',
   isAdmin(),

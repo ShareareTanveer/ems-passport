@@ -7,6 +7,7 @@ export default {
       password: joi.string().min(6).max(30).required(),
       firstName: joi.string().min(3).max(100).required(),
       lastName: joi.string().min(3).max(100).required(),
+      role: joi.number().required(),
     },
   },
   login: {

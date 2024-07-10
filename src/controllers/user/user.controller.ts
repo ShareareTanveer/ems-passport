@@ -31,6 +31,7 @@ const create: IController = async (req, res) => {
       password: req.body.password,
       firstName: req.body.firstName,
       lastName: req.body.lastName,
+      roleId: req.body.role,
     }
     const user = await userService.create(params);
     return ApiResponse.result(res, user, httpStatusCodes.CREATED);

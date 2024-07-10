@@ -1,7 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn, Unique, OneToMany } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, Unique, OneToMany, ManyToOne } from 'typeorm';
 
 // Entities
 import { BaseEntity } from '../base/base.entity';
+import { Role } from './role.entity';
 
 @Entity('user', { orderBy: { id: 'DESC' } })
 export class User extends BaseEntity {
@@ -16,18 +17,16 @@ export class User extends BaseEntity {
   @Column({ length: 100, nullable: false, select: false })
   password: string;
 
-  @Column({ length: 255, nullable: false })
+  @Column({ length: 255, nullable: true })
   firstName: string;
 
-  @Column({ length: 255, nullable: false })
+  @Column({ length: 255, nullable: true })
   lastName: string;
 
   @Column({ default: false })
   isDeleted: boolean;
 
-  toJSON() {
-    delete this.isDeleted;
-    return this;
-  }
+  @ManyToOne(() => Role, role => role.users)
+  role: Role;
 
 }

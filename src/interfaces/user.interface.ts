@@ -6,6 +6,7 @@ export interface ICreateUser {
   password: string;
   firstName: string;
   lastName: string;
+  roleId: number;
 }
 
 export interface ILoginUser {

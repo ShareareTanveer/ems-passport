@@ -19,15 +19,23 @@ import { IDeleteById, IDetailById } from '../../interfaces/common.interface';
 
 // Errors
 import { StringError } from '../../errors/string.error';
+import { Role } from '../../entities/user/role.entity';
 
 const where = { isDeleted: false };
 
 const create = async (params: ICreateUser) => {
+  const roleRepository = getRepository(Role);
+  const role = await roleRepository.findOne(params.roleId);
+
+  if (!role) {
+    throw new Error(`Role with ID ${params.roleId} not found`);
+  }
   const item = new User();
   item.email = params.email;
   item.password = await Encryption.generateHash(params.password, 10);
   item.firstName = params.firstName;
   item.lastName = params.lastName;
+  item.role = role;
   const userData = await getRepository(User).save(item);
   return ApiUtility.sanitizeUser(userData);
 };
