@@ -34,6 +34,7 @@ export default async (
 
       if (decoded) {
         const user = await userService.getById({ id: decoded.data[constants.COOKIE.KEY_USER_ID] });
+        console.log("authentication",user)
         if (user) {
           // @ts-ignore
           req.user = user;
@@ -54,22 +55,18 @@ export default async (
 
 export const checkPermission = (action: string, modelName: string) => {
   return async (req: any, res: any, next: NextFunction) => {
+
       const userRepository = dataSource.getRepository(User);
       const permissionRepository = dataSource.getRepository(Permission);
       try {
-          const user = await userRepository.findOne({where:{id:12},relations:['role', 'role.permissions']});
+          const user = await userRepository.findOne({where:{id: req.user.id},relations:['role', 'role.permissions']});
           if (!user) {
               return res.status(403).json({ message: 'Unauthorized: User not found' });
           }
-
           const permission = await permissionRepository.findOne({ where: { codename: `${action}_${modelName}` } });
-
-          console.log("user",user)
-          console.log("permission",permission)
           if (!permission) {
               return res.status(403).json({ message: 'Unauthorized: Permission not found' });
           }
-
           const hasPermission = user.role.permissions.some(p => p.codename === `${action}_${modelName}`);
           console.log(hasPermission)
           if (hasPermission) {

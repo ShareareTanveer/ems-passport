@@ -20,37 +20,34 @@ const create = async (params: ICreateRole): Promise<Role> => {
     const permissionRepository = dataSource.getRepository(Permission);
     const userRepository = dataSource.getRepository(User);
   
-    // Create a new role entity
     const role = new Role();
     role.name = name;
 
     if (permissions) {
-      role.permissions = await Promise.all(permissions.map(async (permissionId) => {
-        return await permissionRepository.findOneBy(permissionId);
-      }));
-    }
-  
-    if (users) {
-      role.users = await Promise.all(users.map(async (userId) => {
-        return await userRepository.findOneBy(userId);
-      }));
-    }
+      const permissionEntities = await permissionRepository.findByIds(permissions);
+      role.permissions = permissionEntities;
+  }
+
+  if (users) {
+      const userEntities = await userRepository.findByIds(users);
+      role.users = userEntities;
+  }
+
+  await roleRepository.save(role);
   
     return await roleRepository.save(role);
   };
 
 
-
-const update = async (id: number,params: IUpdateRole): Promise<Role> => {
+  const update = async (id: number, params: IUpdateRole): Promise<Role> => {
     const roleRepository = dataSource.getRepository(Role);
     const permissionRepository = dataSource.getRepository(Permission);
     const userRepository = dataSource.getRepository(User);
 
-    
-    console.log("params","params",params)
-    
+    console.log("params", params);
+
     const { name, permissions, users } = params;
-    const role = await roleRepository.findOne({where:{id:id}});
+    const role = await roleRepository.findOne({ where: { id: id }, relations: ['permissions', 'users'] });
     if (!role) {
         throw new Error('Role not found');
     }
@@ -60,19 +57,20 @@ const update = async (id: number,params: IUpdateRole): Promise<Role> => {
     }
 
     if (permissions) {
-        role.permissions = await Promise.all(permissions.map(async (permissionId) => {
-            return await permissionRepository.findOneBy(permissionId);
-        }));
+        const permissionEntities = await permissionRepository.findByIds(permissions);
+        role.permissions = permissionEntities;
     }
 
     if (users) {
-        role.users = await Promise.all(users.map(async (userId) => {
-            return await userRepository.findOneBy(userId);
-        }));
+        const userEntities = await userRepository.findByIds(users);
+        role.users = userEntities;
     }
 
-    return await roleRepository.save(role);
+    await roleRepository.save(role);
+
+    return role;
 };
+
 
 
 const list = async () => {

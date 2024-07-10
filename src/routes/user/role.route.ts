@@ -8,18 +8,18 @@ const router = express.Router();
 
 router.post(
   '/',
-  // checkPermission('read', 'role'),
+  checkPermission('read', 'role'),
   roleController.create,
 );
 
 router.patch(
   '/:id',
-  // checkPermission('update', 'user'),
+  checkPermission('update', 'role'),
   roleController.update,
 );
 
 router.get('/',
-  // checkPermission('read', 'role'), 
+  checkPermission('read', 'role'), 
   roleController.list);
 
 export default router;

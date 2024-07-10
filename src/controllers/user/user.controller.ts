@@ -37,7 +37,6 @@ const create: IController = async (req, res) => {
     return ApiResponse.result(res, user, httpStatusCodes.CREATED);
   } catch (e) {
     if (e.code === constants.ERROR_CODE.DUPLICATED) {
-      console.log(e)
       return ApiResponse.error(res, httpStatusCodes.CONFLICT, 'Email already exists.');
     }
     return ApiResponse.error(res, httpStatusCodes.BAD_REQUEST);
