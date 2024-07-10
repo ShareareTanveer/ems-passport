@@ -1,5 +1,3 @@
-import { getRepository } from 'typeorm';
-
 // Entities
 import { User } from '../../entities/user/user.entity';
 import { Permission } from '../../entities/user/permission.entity';
@@ -13,29 +11,28 @@ import {
 // Errors
 import { Role } from '../../entities/user/role.entity';
 import { StringError } from '../../errors/string.error';
+import dataSource from '../../configs/orm.config';
 
-const where = { isDeleted: false };
 
 const create = async (params: ICreateRole): Promise<Role> => {
     const { name, permissions, users } = params;
-    const roleRepository = getRepository(Role);
-    const permissionRepository = getRepository(Permission);
-    const userRepository = getRepository(User);
+    const roleRepository = dataSource.getRepository(Role);
+    const permissionRepository = dataSource.getRepository(Permission);
+    const userRepository = dataSource.getRepository(User);
   
     // Create a new role entity
     const role = new Role();
     role.name = name;
-  
-    // Fetch permissions based on provided ids
+
     if (permissions) {
       role.permissions = await Promise.all(permissions.map(async (permissionId) => {
-        return await permissionRepository.findOne(permissionId);
+        return await permissionRepository.findOneBy(permissionId);
       }));
     }
   
     if (users) {
       role.users = await Promise.all(users.map(async (userId) => {
-        return await userRepository.findOne(userId);
+        return await userRepository.findOneBy(userId);
       }));
     }
   
@@ -45,13 +42,15 @@ const create = async (params: ICreateRole): Promise<Role> => {
 
 
 const update = async (id: number,params: IUpdateRole): Promise<Role> => {
-    const roleRepository = getRepository(Role);
-    const permissionRepository = getRepository(Permission);
-    const userRepository = getRepository(User);
+    const roleRepository = dataSource.getRepository(Role);
+    const permissionRepository = dataSource.getRepository(Permission);
+    const userRepository = dataSource.getRepository(User);
 
+    
+    console.log("params","params",params)
+    
     const { name, permissions, users } = params;
-
-    const role = await roleRepository.findOne(id);
+    const role = await roleRepository.findOne({where:{id:id}});
     if (!role) {
         throw new Error('Role not found');
     }
@@ -62,13 +61,13 @@ const update = async (id: number,params: IUpdateRole): Promise<Role> => {
 
     if (permissions) {
         role.permissions = await Promise.all(permissions.map(async (permissionId) => {
-            return await permissionRepository.findOne(permissionId);
+            return await permissionRepository.findOneBy(permissionId);
         }));
     }
 
     if (users) {
         role.users = await Promise.all(users.map(async (userId) => {
-            return await userRepository.findOne(userId);
+            return await userRepository.findOneBy(userId);
         }));
     }
 
@@ -77,7 +76,7 @@ const update = async (id: number,params: IUpdateRole): Promise<Role> => {
 
 
 const list = async () => {
-    const roleRepository = getRepository(Role);
+    const roleRepository = dataSource.getRepository(Role);
     return await roleRepository.find({ relations: ['permissions', 'users'] });
     }
   

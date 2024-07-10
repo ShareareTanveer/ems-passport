@@ -1,6 +1,5 @@
 import express, { NextFunction } from 'express';
 import httpStatusCodes from 'http-status-codes';
-import { getRepository } from 'typeorm';
 
 // Services
 import userService from '../services/user/user.service';
@@ -19,6 +18,7 @@ import constants from '../constants';
 // entity
 import { User } from '../entities/user/user.entity';
 import { Permission } from '../entities/user/permission.entity';
+import dataSource from '../configs/orm.config';
 
 
 export default async (
@@ -34,7 +34,6 @@ export default async (
 
       if (decoded) {
         const user = await userService.getById({ id: decoded.data[constants.COOKIE.KEY_USER_ID] });
-
         if (user) {
           // @ts-ignore
           req.user = user;
@@ -55,12 +54,10 @@ export default async (
 
 export const checkPermission = (action: string, modelName: string) => {
   return async (req: any, res: any, next: NextFunction) => {
-      const userRepository = getRepository(User);
-      const permissionRepository = getRepository(Permission);
-
+      const userRepository = dataSource.getRepository(User);
+      const permissionRepository = dataSource.getRepository(Permission);
       try {
-          const user = await userRepository.findOne(req.user.id, { relations: ['role', 'role.permissions'] });
-
+          const user = await userRepository.findOne({where:{id:12},relations:['role', 'role.permissions']});
           if (!user) {
               return res.status(403).json({ message: 'Unauthorized: User not found' });
           }

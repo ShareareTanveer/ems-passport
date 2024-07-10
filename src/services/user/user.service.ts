@@ -1,4 +1,3 @@
-import { getRepository } from 'typeorm';
 
 // Entities
 import { User } from '../../entities/user/user.entity';
@@ -20,12 +19,13 @@ import { IDeleteById, IDetailById } from '../../interfaces/common.interface';
 // Errors
 import { StringError } from '../../errors/string.error';
 import { Role } from '../../entities/user/role.entity';
+import dataSource from '../../configs/orm.config';
 
 const where = { isDeleted: false };
 
 const create = async (params: ICreateUser) => {
-  const roleRepository = getRepository(Role);
-  const role = await roleRepository.findOne(params.roleId);
+  const roleRepository = dataSource.getRepository(Role);
+  const role = await roleRepository.findOne({where:{id:params.roleId}});
 
   if (!role) {
     throw new Error(`Role with ID ${params.roleId} not found`);
@@ -36,12 +36,12 @@ const create = async (params: ICreateUser) => {
   item.firstName = params.firstName;
   item.lastName = params.lastName;
   item.role = role;
-  const userData = await getRepository(User).save(item);
+  const userData = await dataSource.getRepository(User).save(item);
   return ApiUtility.sanitizeUser(userData);
 };
 
 const login = async (params: ILoginUser) => {
-  const user = await getRepository(User)
+  const user = await dataSource.getRepository(User)
     .createQueryBuilder('user')
     .where('user.email = :email', { email: params.email })
     .select([
@@ -69,7 +69,7 @@ const login = async (params: ILoginUser) => {
 
 const getById = async (params: IDetailById) => {
   try {
-    const data = await getRepository(User).findOne({ id: params.id });
+    const data = await dataSource.getRepository(User).findOne({where:{id:params.id},relations:["role"]});
     return ApiUtility.sanitizeUser(data);
   } catch (e) {
     return null;
@@ -81,7 +81,7 @@ const detail = async (params: IDetailById) => {
     where: { ...where, id: params.id },
   }
 
-  const user = await getRepository(User).findOne(query);
+  const user = await dataSource.getRepository(User).findOne(query);
   if (!user) {
     throw new StringError('User is not existed');
   }
@@ -92,12 +92,12 @@ const detail = async (params: IDetailById) => {
 const update = async (params: IUpdateUser) => {
   const query = { ...where, id: params.id };
 
-  const user = await getRepository(User).findOne(query);
+  const user = await dataSource.getRepository(User).findOne({where:{id:params.id}});
   if (!user) {
     throw new StringError('User is not existed');
   }
 
-  return await getRepository(User).update(query, {
+  return await dataSource.getRepository(User).update(query, {
     firstName: params.firstName,
     lastName: params.lastName,
     updatedAt: DateTimeUtility.getCurrentTimeStamp(),
@@ -105,7 +105,7 @@ const update = async (params: IUpdateUser) => {
 }
 
 const list = async (params: IUserQueryParams) => {
-  let userRepo = getRepository(User).createQueryBuilder('user');
+  let userRepo = dataSource.getRepository(User).createQueryBuilder('user');
   userRepo = userRepo.where('user.isDeleted = :isDeleted', { isDeleted: false });
 
   if (params.keyword) {
@@ -135,12 +135,12 @@ const list = async (params: IUserQueryParams) => {
 const remove = async (params: IDeleteById) => {
   const query = { ...where, id: params.id };
 
-  const user = await getRepository(User).findOne(query);
+  const user = await dataSource.getRepository(User).findOne({where:{id:params.id}});
   if (!user) {
     throw new StringError('User is not existed');
   }
 
-  return await getRepository(User).update(query, {
+  return await dataSource.getRepository(User).update(query, {
     isDeleted: true,
     updatedAt: DateTimeUtility.getCurrentTimeStamp(),
   });

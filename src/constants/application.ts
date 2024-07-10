@@ -13,6 +13,7 @@ export default {
   authorizationIgnorePath: [
     '/',
     '/auth/login',
+    '/auth/logout',
     '/auth/register',
     '/role',
   ],

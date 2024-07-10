@@ -27,7 +27,7 @@ import constants from '../../constants';
 const create: IController = async (req, res) => {
   try {
     const params: ICreateUser = {
-      email: req.body.email,
+      email: req.body.email, 
       password: req.body.password,
       firstName: req.body.firstName,
       lastName: req.body.lastName,
@@ -37,6 +37,7 @@ const create: IController = async (req, res) => {
     return ApiResponse.result(res, user, httpStatusCodes.CREATED);
   } catch (e) {
     if (e.code === constants.ERROR_CODE.DUPLICATED) {
+      console.log(e)
       return ApiResponse.error(res, httpStatusCodes.CONFLICT, 'Email already exists.');
     }
     return ApiResponse.error(res, httpStatusCodes.BAD_REQUEST);
@@ -59,6 +60,20 @@ const login: IController = async (req, res) => {
     return ApiResponse.error(res, httpStatusCodes.BAD_REQUEST, 'Something went wrong');
   }
 };
+
+
+const logout: IController = async (req, res) => {
+  try {
+    res.clearCookie(constants.COOKIE.COOKIE_USER);
+    return ApiResponse.result(res, {}, httpStatusCodes.OK, {
+      key: constants.COOKIE.COOKIE_USER,
+      value: '',
+    });
+  } catch (e) {
+    ApiResponse.exception(res, e);
+  }
+};
+
 
 const me: IController = async (req, res) => {
   const cookie = await generateUserCookie(req.user.id);
@@ -146,4 +161,5 @@ export default {
   updateMe,
   list,
   remove,
+  logout,
 };
