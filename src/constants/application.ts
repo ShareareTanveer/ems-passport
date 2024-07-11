@@ -12,7 +12,7 @@ export default {
   },
   authorizationIgnorePath: [
     '/',
-    '/auth/login',
+    '/auth/send-email-otp',
     '/auth/register',
   ],
 };

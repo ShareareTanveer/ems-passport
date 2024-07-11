@@ -2,15 +2,14 @@ require('dotenv').config();
 import 'reflect-metadata';
 import logger from './configs/logger.config';
 import app from './configs/express.config';
-import { generatePermissions } from './utilities/generatePermission.utility';
-import { generateRoles } from './utilities/generateRole';
+
 import dataSource from './configs/orm.config';
 const PORT = process.env.PORT || 5000;
 
 
 dataSource
   .initialize()
-  .then(() => {
+  .then(async () => {
     logger.info('Connected to database successfully');
     // try {
     //       await generatePermissions()

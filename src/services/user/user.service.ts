@@ -1,33 +1,41 @@
-
 // Entities
 import { User } from '../../entities/user/user.entity';
 
 // Utilities
-import Encryption from '../../utilities/encryption.utility';
 import ApiUtility from '../../utilities/api.utility';
 import DateTimeUtility from '../../utilities/date-time.utility';
+import Encryption from '../../utilities/encryption.utility';
 
 // Interfaces
+import {
+  IDeleteById,
+  IDetailById,
+} from '../../interfaces/common.interface';
 import {
   ICreateUser,
   ILoginUser,
   IUpdateUser,
   IUserQueryParams,
 } from '../../interfaces/user.interface';
-import { IDeleteById, IDetailById } from '../../interfaces/common.interface';
 
 // Errors
-import { StringError } from '../../errors/string.error';
-import { Role } from '../../entities/user/role.entity';
 import dataSource from '../../configs/orm.config';
+import { Role } from '../../entities/user/role.entity';
+import { StringError } from '../../errors/string.error';
+import {
+  sendEmailOtpDTO,
+  verifyEmailOtpDTO,
+} from '../dto/auth/auth.dto';
+import transporter from '../../utilities/sendMail.utility';
+import { stringify } from 'uuid';
 
 const where = { isDeleted: false };
 
 const create = async (params: ICreateUser) => {
   const roleRepository = dataSource.getRepository(Role);
-  console.log(params)
-  const role = await roleRepository.findOne({where:{id:params.roleId}});
-  console.log(role)
+  const role = await roleRepository.findOne({
+    where: { id: params.roleId },
+  });
 
   if (!role) {
     throw new Error(`Role with ID ${params.roleId} not found`);
@@ -43,7 +51,8 @@ const create = async (params: ICreateUser) => {
 };
 
 const login = async (params: ILoginUser) => {
-  const user = await dataSource.getRepository(User)
+  const user = await dataSource
+    .getRepository(User)
     .createQueryBuilder('user')
     .where('user.email = :email', { email: params.email })
     .select([
@@ -69,9 +78,72 @@ const login = async (params: ILoginUser) => {
   throw new StringError('Your password is not correct');
 };
 
+
+const otpStore = new Map<string, string>();
+
+export const sendEmailOtp = async (params: { email: string }) => {
+  const userRepository = dataSource.getRepository(User);
+  const user = await userRepository.findOne({ where: { email: params.email } });
+
+  if (!user) {
+    throw new StringError('Your email has not been registered');
+  }
+
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  otpStore.set(params.email, otp);
+  console.log('Generated OTP:', otp);
+
+  try {
+    await transporter.sendMail({
+      from: process.env.DEFAULT_MAIL || 'your-email@example.com',
+      to: user.email,
+      subject: 'OTP for Password Reset',
+      text: `Your OTP for password reset: ${otp}`,
+    });
+    return true;
+  } catch (error) {
+    console.error('Error sending email:', error);
+    throw new Error('Failed to send OTP. Please try again later.');
+  }
+};
+
+export const verifyEmailOtp = async (params: { email: string; otp: number }) => {
+  const storedOtp = otpStore.get(params.email);
+
+  if (!storedOtp || storedOtp !== JSON.stringify(params.otp)) {
+    throw new StringError('Invalid OTP');
+  }
+
+  return true;
+};
+
+export const changePassword = async (params: { email: string; otp: string; newPassword: string }) => {
+  const userRepository = dataSource.getRepository(User);
+  const user = await userRepository.findOne({ where: { email: params.email } });
+
+  if (!user) {
+    throw new StringError('Your email has not been registered');
+  }
+
+  const storedOtp = otpStore.get(params.email);
+
+  if (!storedOtp || storedOtp !== params.otp) {
+    throw new StringError('Invalid OTP');
+  }
+
+  user.password = params.newPassword; // Ensure to hash the password before storing it
+  await userRepository.save(user);
+
+  otpStore.delete(params.email);
+
+  return true;
+};
+
 const getById = async (params: IDetailById) => {
   try {
-    const data = await dataSource.getRepository(User).findOne({where:{id:params.id},relations:["role"]});
+    const data = await dataSource
+      .getRepository(User)
+      .findOne({ where: { id: params.id }, relations: ['role'] });
     return ApiUtility.sanitizeUser(data);
   } catch (e) {
     return null;
@@ -81,7 +153,7 @@ const getById = async (params: IDetailById) => {
 const detail = async (params: IDetailById) => {
   const query = {
     where: { ...where, id: params.id },
-  }
+  };
 
   const user = await dataSource.getRepository(User).findOne(query);
   if (!user) {
@@ -89,12 +161,14 @@ const detail = async (params: IDetailById) => {
   }
 
   return ApiUtility.sanitizeUser(user);
-}
+};
 
 const update = async (params: IUpdateUser) => {
   const query = { ...where, id: params.id };
 
-  const user = await dataSource.getRepository(User).findOne({where:{id:params.id}});
+  const user = await dataSource
+    .getRepository(User)
+    .findOne({ where: { id: params.id } });
   if (!user) {
     throw new StringError('User is not existed');
   }
@@ -104,11 +178,15 @@ const update = async (params: IUpdateUser) => {
     lastName: params.lastName,
     updatedAt: DateTimeUtility.getCurrentTimeStamp(),
   });
-}
+};
 
 const list = async (params: IUserQueryParams) => {
-  let userRepo = dataSource.getRepository(User).createQueryBuilder('user');
-  userRepo = userRepo.where('user.isDeleted = :isDeleted', { isDeleted: false });
+  let userRepo = dataSource
+    .getRepository(User)
+    .createQueryBuilder('user');
+  userRepo = userRepo.where('user.isDeleted = :isDeleted', {
+    isDeleted: false,
+  });
 
   if (params.keyword) {
     userRepo = userRepo.andWhere(
@@ -120,9 +198,15 @@ const list = async (params: IUserQueryParams) => {
   // Pagination
   const paginationRepo = userRepo;
   const total = await paginationRepo.getMany();
-  const pagRes = ApiUtility.getPagination(total.length, params.limit, params.page);
+  const pagRes = ApiUtility.getPagination(
+    total.length,
+    params.limit,
+    params.page,
+  );
 
-  userRepo = userRepo.limit(params.limit).offset(ApiUtility.getOffset(params.limit, params.page));
+  userRepo = userRepo
+    .limit(params.limit)
+    .offset(ApiUtility.getOffset(params.limit, params.page));
   const users = await userRepo.getMany();
 
   const response = [];
@@ -137,7 +221,9 @@ const list = async (params: IUserQueryParams) => {
 const remove = async (params: IDeleteById) => {
   const query = { ...where, id: params.id };
 
-  const user = await dataSource.getRepository(User).findOne({where:{id:params.id}});
+  const user = await dataSource
+    .getRepository(User)
+    .findOne({ where: { id: params.id } });
   if (!user) {
     throw new StringError('User is not existed');
   }
@@ -146,7 +232,7 @@ const remove = async (params: IDeleteById) => {
     isDeleted: true,
     updatedAt: DateTimeUtility.getCurrentTimeStamp(),
   });
-}
+};
 
 export default {
   create,
@@ -156,4 +242,7 @@ export default {
   update,
   list,
   remove,
-}
+  sendEmailOtp,
+  verifyEmailOtp,
+  changePassword,
+};

@@ -1,12 +1,13 @@
 // src/utils/generatePermissions.ts
-import { getConnection, getRepository, Connection } from 'typeorm';
+import { getConnection } from 'typeorm';
 import { Role } from '../entities/user/role.entity';
+import dataSource from '../configs/orm.config';
 
 const roles = ['admin', 'user', 'employees'];
 
 export const generateRoles = async () => {
     const connection = getConnection();
-    const permissionRepository = getRepository(Role);
+    const roleRepository = dataSource.getRepository(Role);
 
     const schemaBuilder = connection.options.type === "mysql" ? (connection.driver as any).database : connection.name;
     const doesTableExist = await connection.query(`
@@ -25,12 +26,12 @@ export const generateRoles = async () => {
         `);
     }
         for (const role of roles) {
-            const roleExists = await permissionRepository.findOne({ where: { role } });
+            const roleExists = await roleRepository.findOne({ where: { name:role } });
             if (!roleExists) {
-                const roleCreate = permissionRepository.create({
+                const roleCreate = roleRepository.create({
                     name: `role`
                 });
-                await permissionRepository.save(roleCreate);
+                await roleRepository.save(roleCreate);
             }
         }
     
