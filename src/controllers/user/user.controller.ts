@@ -39,7 +39,7 @@ const create: IController = async (req, res) => {
     if (e.code === constants.ERROR_CODE.DUPLICATED) {
       return ApiResponse.error(res, httpStatusCodes.CONFLICT, 'Email already exists.');
     }
-    return ApiResponse.error(res, httpStatusCodes.BAD_REQUEST);
+    return ApiResponse.error(res, httpStatusCodes.BAD_REQUEST, e?.message);
   }
 };
 
@@ -54,9 +54,9 @@ const login: IController = async (req, res) => {
     return ApiResponse.result(res, user, httpStatusCodes.OK, cookie);
   } catch (e) {
     if (e instanceof StringError) {
-      return ApiResponse.error(res, httpStatusCodes.BAD_REQUEST, e.message);
+      return ApiResponse.error(res, httpStatusCodes.BAD_REQUEST, e?.message);
     }
-    return ApiResponse.error(res, httpStatusCodes.BAD_REQUEST, 'Something went wrong');
+    return ApiResponse.error(res, httpStatusCodes.BAD_REQUEST, 'Something went wrong',  e?.message);
   }
 };
 

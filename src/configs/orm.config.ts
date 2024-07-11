@@ -1,5 +1,5 @@
-import { DataSource } from 'typeorm';
 require('dotenv/config');
+import { DataSource } from 'typeorm';
 
 const dataSource = new DataSource({
   type: 'mysql',
@@ -9,7 +9,7 @@ const dataSource = new DataSource({
   database: process.env.DB_NAME || 'nodejs-sample',
   port: parseInt(process.env.DB_PORT || '3306', 10),
   charset: 'utf8',
-  synchronize: true,
+  synchronize: false,
   entities:
     process.env.NODE_ENV !== 'production'
       ? ['src/**/*.entity.ts']

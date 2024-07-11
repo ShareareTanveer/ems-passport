@@ -1,5 +1,4 @@
 import express from 'express';
-const schemaValidator = require('express-joi-validator');
 
 import { checkPermission } from '../../middlewares/authenticate.middleware';
 import roleController from '../../controllers/user/role.controller';
