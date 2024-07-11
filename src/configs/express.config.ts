@@ -3,14 +3,15 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 
-import authenticate from '../middlewares/authenticate.middleware';
-import constants from '../constants';
-import indexRoute from '../routes/index.route';
-import joiErrorHandler from '../middlewares/joi-error-handler.middleware';
 import { notFoundErrorHandler, errorHandler } from '../middlewares/api-error-handler.middleware';
-import swaggerDocs from './swagger.config';
+import joiErrorHandler from '../middlewares/joi-error-handler.middleware';
+import authenticate from '../middlewares/authenticate.middleware';
 
-const { specs, swaggerUi } = require('./swagger.config.ts');
+import indexRoute from '../routes/index.route';
+
+import constants from '../constants';
+
+import swaggerDocs from './swagger.config';
 
 
 const app = express();

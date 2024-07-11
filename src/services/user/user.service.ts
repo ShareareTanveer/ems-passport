@@ -25,7 +25,9 @@ const where = { isDeleted: false };
 
 const create = async (params: ICreateUser) => {
   const roleRepository = dataSource.getRepository(Role);
+  console.log(params)
   const role = await roleRepository.findOne({where:{id:params.roleId}});
+  console.log(role)
 
   if (!role) {
     throw new Error(`Role with ID ${params.roleId} not found`);

@@ -48,7 +48,6 @@ const update: IController  = async (req, res) => {
 };
 
 
-
 const list: IController = async (req, res) => {
   try {
     const data = await roleService.list();

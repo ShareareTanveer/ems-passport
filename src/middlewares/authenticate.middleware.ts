@@ -18,6 +18,8 @@ import constants from '../constants';
 // entity
 import { User } from '../entities/user/user.entity';
 import { Permission } from '../entities/user/permission.entity';
+
+// config
 import dataSource from '../configs/orm.config';
 
 
@@ -34,7 +36,6 @@ export default async (
 
       if (decoded) {
         const user = await userService.getById({ id: decoded.data[constants.COOKIE.KEY_USER_ID] });
-        console.log("authentication",user)
         if (user) {
           // @ts-ignore
           req.user = user;
@@ -68,7 +69,6 @@ export const checkPermission = (action: string, modelName: string) => {
               return res.status(403).json({ message: 'Unauthorized: Permission not found' });
           }
           const hasPermission = user.role.permissions.some(p => p.codename === `${action}_${modelName}`);
-          console.log(hasPermission)
           if (hasPermission) {
               next();
           } else {

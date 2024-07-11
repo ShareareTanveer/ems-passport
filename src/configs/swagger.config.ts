@@ -3,17 +3,27 @@ const swaggerUi = require('swagger-ui-express');
 
 const options: any = {
   definition: {
-    openapi: "3.0.0",
+    openapi: '3.0.0',
     info: {
-      title: "REST API Docs",
-    //   version,
+      description: 'Employee Management System is Powerful app that manages all official operations',
+      version: '1.0.0',
+      title: 'EMS PASSPORT APP',
+      termsOfService: 'http://swagger.io/terms/',
+      contact: {
+        email: 'codecanvus@gmail.com',
+      },
+      license: {
+        name: 'Apache 2.0',
+        url: 'http://www.apache.org/licenses/LICENSE-2.0.html',
+      },
     },
+    schemes: ['https', 'http'],
     components: {
       securitySchemes: {
         bearerAuth: {
-          type: "http",
-          scheme: "bearer",
-          bearerFormat: "JWT",
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
         },
       },
     },
@@ -23,22 +33,17 @@ const options: any = {
       },
     ],
   },
-  apis: ["../routes/*.*.ts", "../routes/*.ts"],
+  apis: ['../routes/*.*.ts', '../routes/*.ts', '../routes/**/*.ts'],
 };
 
 const swaggerSpec = swaggerJsdoc(options);
 
 function swaggerDocs(app: any) {
-  // Swagger page
-  app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
-  // Docs in JSON format
-  app.get("/docs.json", (req: Request, res: any) => {
-    res.setHeader("Content-Type", "application/json");
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.get('/docs.json', (req: Request, res: any) => {
+    res.setHeader('Content-Type', 'application/json');
     res.send(swaggerSpec);
   });
-
-//   log.info(`Docs available at http://localhost:${port}/docs`);
 }
 
 export default swaggerDocs;
