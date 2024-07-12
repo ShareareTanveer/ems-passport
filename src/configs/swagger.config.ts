@@ -17,7 +17,12 @@ const options: any = {
         url: 'http://www.apache.org/licenses/LICENSE-2.0.html',
       },
     },
-    schemes: ['https', 'http'],
+    servers: [
+      {
+        url: 'http://localhost:8000',
+        description: 'Development server',
+      },
+    ],
     components: {
       securitySchemes: {
         bearerAuth: {
@@ -32,8 +37,22 @@ const options: any = {
         bearerAuth: [],
       },
     ],
+    tags: [ // Define your tags here
+      {
+        name: 'Auth',
+        description: 'Endpoints related to authentication',
+      },
+      {
+        name: 'User',
+        description: 'Endpoints related to user management',
+      },
+      {
+        name: 'Role',
+        description: 'Endpoints related to roles and permissions',
+      },
+    ],
   },
-  apis: ['../routes/*.*.ts', '../routes/*.ts', '../routes/**/*.ts'],
+  apis: ['src/routes/*.ts', 'src/routes/**/*.ts'],
 };
 
 const swaggerSpec = swaggerJsdoc(options);

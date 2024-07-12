@@ -26,9 +26,11 @@ import { StringError } from '../../errors/string.error';
 import transporter from '../../configs/sendMail.config';
 import { RegisterUserDTO } from '../dto/user/user.dto';
 import { UserDetail } from '../../entities/user/userDetails.entity';
+import { loginDTO } from '../dto/auth/auth.dto';
 
 
 const where = { isDeleted: false };
+
 const create = async (params: RegisterUserDTO) => {
   const roleRepository = dataSource.getRepository(Role);
   const role = await roleRepository.findOne({
@@ -39,18 +41,17 @@ const create = async (params: RegisterUserDTO) => {
     throw new Error(`Role with ID ${params.role} not found`);
   }
 
+  const userDetail = new UserDetail();
+  userDetail.phone = params.phone;
+  userDetail.address = params.address;
+  userDetail.gender = params.gender;
+
   const user = new User();
   user.email = params.email;
   user.password = await Encryption.generateHash(params.password, 10);
   user.firstName = params.firstName;
   user.lastName = params.lastName;
   user.role = role;
-
-  const userDetail = new UserDetail();
-  userDetail.phone = params.phone;
-  userDetail.address = params.address;
-  userDetail.gender = params.gender;
-  userDetail.user = user;
 
   user.details = userDetail;
 
@@ -59,7 +60,7 @@ const create = async (params: RegisterUserDTO) => {
 };
 
 
-const login = async (params: ILoginUser) => {
+const login = async (params: loginDTO) => {
   const user = await dataSource
     .getRepository(User)
     .createQueryBuilder('user')

@@ -32,5 +32,21 @@ export class RegisterUserDTO extends BaseDTO {
     @IsNotEmpty() 
     @IsNumber()
     role: number;
-  
+}
+
+export class MeDTO extends BaseDTO {
+    @IsOptional()
+    firstName?: string;
+    
+    @IsOptional()
+    lastName?: string;    
+    
+    @IsOptional()
+    phone?: string;
+       
+    @IsOptional()
+    address?: string;     
+
+    @IsOptional()
+    gender: EGender;
 }

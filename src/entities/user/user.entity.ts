@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn, Unique, ManyToOne, OneToOne } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, Unique, ManyToOne, OneToOne, JoinColumn } from 'typeorm';
 import { IsEmail, IsNotEmpty, IsNumber,IsStrongPassword } from 'class-validator';
 import { Exclude, Expose, Type } from 'class-transformer';
 
@@ -33,7 +33,8 @@ export class User extends BaseEntity {
   @ManyToOne(() => Role, role => role.users)
   role: Role;
 
-  @OneToOne(() => UserDetail, userDetail => userDetail.user, { cascade: true })
-  @Expose({ groups: ['userDetails'] })
-  details: UserDetail;
+
+  @OneToOne(() => UserDetail)
+  @JoinColumn()
+  details: UserDetail
 }

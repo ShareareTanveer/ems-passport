@@ -38,13 +38,4 @@ export class UserDetail {
   @IsEnum(EGender, { message: 'Gender must be Male, Female, or Other' })
   gender: EGender;
   
-  @OneToOne(() => User, user => user.details)
-  @JoinColumn({ name: 'userId' })
-  @Exclude()
-  user: User;
-
-  @Expose()
-  getUserId(): number {
-    return this.user?.id;
-  }
 }

@@ -9,8 +9,6 @@ import {
   IDetailById,
 } from '../../interfaces/common.interface';
 import {
-  ICreateUser,
-  ILoginUser,
   IUpdateUser,
   IUserQueryParams,
 } from '../../interfaces/user.interface';
@@ -31,13 +29,12 @@ import constants from '../../constants';
 
 // DTO
 import {
+  loginDTO,
   resetPasswordDTO,
   sendEmailOtpDTO,
   verifyEmailOtpDTO,
 } from '../../services/dto/auth/auth.dto';
 import { RegisterUserDTO } from '../../services/dto/user/user.dto';
-import { plainToClass } from 'class-transformer';
-import { User } from '../../entities/user/user.entity';
 
 const create: IController = async (req, res) => {
   try {
@@ -53,9 +50,7 @@ const create: IController = async (req, res) => {
     };
 
     const user = await userService.create(params);
-
-    const sanitizedUser = plainToClass(User, user, { groups: ['userDetails'], excludeExtraneousValues: true });
-    return ApiResponse.result(res, sanitizedUser, httpStatusCodes.CREATED);
+    return ApiResponse.result(res, user, httpStatusCodes.CREATED);
   } catch (e) {
     if (e.code === constants.ERROR_CODE.DUPLICATED) {
       return ApiResponse.error(
@@ -74,7 +69,7 @@ const create: IController = async (req, res) => {
 
 const login: IController = async (req, res) => {
   try {
-    const params: ILoginUser = {
+    const params: loginDTO = {
       email: req.body.email,
       password: req.body.password,
     };
@@ -97,6 +92,7 @@ const login: IController = async (req, res) => {
     );
   }
 };
+
 export const sendEmailOtp: IController = async (req, res) => {
   try {
     const params: sendEmailOtpDTO = {
