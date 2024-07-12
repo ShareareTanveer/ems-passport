@@ -1,6 +1,7 @@
-import { IsEmail,IsNotEmpty,IsNumber, IsStrongPassword } from 'class-validator';
+import { IsEmail,IsNotEmpty,IsNumber, IsOptional, IsStrongPassword } from 'class-validator';
 
 import { BaseDTO } from '../base.dto';
+import { EGender } from '../../../entities/enum/user.enum';
 
 export class RegisterUserDTO extends BaseDTO {
     id?: number;
@@ -16,10 +17,18 @@ export class RegisterUserDTO extends BaseDTO {
     @IsNotEmpty()
     firstName: string;
     
-    lastName?: string;
+    @IsOptional()
+    lastName?: string;    
     
-    isDeleted?: boolean;
-    
+    @IsOptional()
+    phone?: string;
+       
+    @IsOptional()
+    address?: string;     
+
+    @IsNotEmpty()
+    gender: EGender;
+         
     @IsNotEmpty() 
     @IsNumber()
     role: number;

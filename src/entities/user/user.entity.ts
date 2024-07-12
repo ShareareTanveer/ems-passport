@@ -1,9 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn, Unique, ManyToOne } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, Unique, ManyToOne, OneToOne } from 'typeorm';
 import { IsEmail, IsNotEmpty, IsNumber,IsStrongPassword } from 'class-validator';
+import { Exclude, Expose, Type } from 'class-transformer';
 
 // Entities
 import { BaseEntity } from '../base/base.entity';
 import { Role } from './role.entity';
+import { UserDetail } from './userDetails.entity';
 
 @Entity('user', { orderBy: { id: 'DESC' } })
 export class User extends BaseEntity {
@@ -31,4 +33,7 @@ export class User extends BaseEntity {
   @ManyToOne(() => Role, role => role.users)
   role: Role;
 
+  @OneToOne(() => UserDetail, userDetail => userDetail.user, { cascade: true })
+  @Expose({ groups: ['userDetails'] })
+  details: UserDetail;
 }

@@ -1,4 +1,5 @@
 // Entities
+import { Role } from '../../entities/user/role.entity';
 import { User } from '../../entities/user/user.entity';
 
 // Utilities
@@ -20,32 +21,43 @@ import {
 
 // Errors
 import dataSource from '../../configs/orm.config';
-import { Role } from '../../entities/user/role.entity';
 import { StringError } from '../../errors/string.error';
 
 import transporter from '../../configs/sendMail.config';
+import { RegisterUserDTO } from '../dto/user/user.dto';
+import { UserDetail } from '../../entities/user/userDetails.entity';
 
 
 const where = { isDeleted: false };
-
-const create = async (params: ICreateUser) => {
+const create = async (params: RegisterUserDTO) => {
   const roleRepository = dataSource.getRepository(Role);
   const role = await roleRepository.findOne({
-    where: { id: params.roleId },
+    where: { id: params.role },
   });
 
   if (!role) {
-    throw new Error(`Role with ID ${params.roleId} not found`);
+    throw new Error(`Role with ID ${params.role} not found`);
   }
-  const item = new User();
-  item.email = params.email;
-  item.password = await Encryption.generateHash(params.password, 10);
-  item.firstName = params.firstName;
-  item.lastName = params.lastName;
-  item.role = role;
-  const userData = await dataSource.getRepository(User).save(item);
+
+  const user = new User();
+  user.email = params.email;
+  user.password = await Encryption.generateHash(params.password, 10);
+  user.firstName = params.firstName;
+  user.lastName = params.lastName;
+  user.role = role;
+
+  const userDetail = new UserDetail();
+  userDetail.phone = params.phone;
+  userDetail.address = params.address;
+  userDetail.gender = params.gender;
+  userDetail.user = user;
+
+  user.details = userDetail;
+
+  const userData = await dataSource.getRepository(User).save(user);
   return ApiUtility.sanitizeUser(userData);
 };
+
 
 const login = async (params: ILoginUser) => {
   const user = await dataSource

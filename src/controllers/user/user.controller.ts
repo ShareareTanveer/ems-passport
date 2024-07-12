@@ -35,18 +35,27 @@ import {
   sendEmailOtpDTO,
   verifyEmailOtpDTO,
 } from '../../services/dto/auth/auth.dto';
+import { RegisterUserDTO } from '../../services/dto/user/user.dto';
+import { plainToClass } from 'class-transformer';
+import { User } from '../../entities/user/user.entity';
 
 const create: IController = async (req, res) => {
   try {
-    const params: ICreateUser = {
+    const params: RegisterUserDTO = {
       email: req.body.email,
       password: req.body.password,
       firstName: req.body.firstName,
       lastName: req.body.lastName,
-      roleId: req.body.role,
+      phone: req.body.phone,
+      address: req.body.address,
+      gender: req.body.gender,
+      role: req.body.role,
     };
+
     const user = await userService.create(params);
-    return ApiResponse.result(res, user, httpStatusCodes.CREATED);
+
+    const sanitizedUser = plainToClass(User, user, { groups: ['userDetails'], excludeExtraneousValues: true });
+    return ApiResponse.result(res, sanitizedUser, httpStatusCodes.CREATED);
   } catch (e) {
     if (e.code === constants.ERROR_CODE.DUPLICATED) {
       return ApiResponse.error(
