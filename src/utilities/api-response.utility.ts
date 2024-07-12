@@ -48,6 +48,11 @@ export default class ApiResponse {
     res.cookie(key, value);
   };
 
+  static deleteCookie = (res: Response, key: string) => {
+    res.cookie(key, '', { expires: new Date(0), httpOnly: true });
+  };
+
+
   static exception(res: any, error: any) {
     if (error instanceof StringError) {
       return ApiResponse.error(res, httpStatusCodes.BAD_REQUEST, error.message);

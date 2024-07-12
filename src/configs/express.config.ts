@@ -2,6 +2,8 @@ import * as bodyParser from 'body-parser';
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+const path = require('path');
+const cookieParser = require('cookie-parser')
 
 import { notFoundErrorHandler, errorHandler } from '../middlewares/api-error-handler.middleware';
 import joiErrorHandler from '../middlewares/joi-error-handler.middleware';
@@ -41,6 +43,8 @@ const corsOption = {
 
 app.use(cors(corsOption));
 
+app.use(cookieParser());
+
 app.use(bodyParser.json());
 
 app.use(morgan('dev'));
@@ -56,5 +60,9 @@ app.use(joiErrorHandler);
 // Error Handler
 app.use(notFoundErrorHandler);
 app.use(errorHandler);
+
+// static
+app.use(express.static(path.join(__dirname, 'public')));
+
 
 export default app;

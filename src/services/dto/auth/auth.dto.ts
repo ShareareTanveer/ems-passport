@@ -1,4 +1,9 @@
-import { IsEmail, IsNotEmpty, IsNumber } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsNumber,
+  IsStrongPassword,
+} from 'class-validator';
 
 export class sendEmailOtpDTO {
   @IsEmail()
@@ -16,16 +21,11 @@ export class verifyEmailOtpDTO {
   otp: number;
 }
 
-export class changePasswordDTO {
-  @IsEmail()
+export class resetPasswordDTO {
   @IsNotEmpty()
-  email: string;
-  
-  @IsNotEmpty()
-  @IsNumber()
-  otp: string;
-  
-  @IsNotEmpty()
-  @IsNumber()
+  @IsStrongPassword()
   newPassword: string;
+
+  @IsNotEmpty()
+  confirmNewPassword: string;
 }

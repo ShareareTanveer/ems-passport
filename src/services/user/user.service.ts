@@ -22,12 +22,9 @@ import {
 import dataSource from '../../configs/orm.config';
 import { Role } from '../../entities/user/role.entity';
 import { StringError } from '../../errors/string.error';
-import {
-  sendEmailOtpDTO,
-  verifyEmailOtpDTO,
-} from '../dto/auth/auth.dto';
-import transporter from '../../utilities/sendMail.utility';
-import { stringify } from 'uuid';
+
+import transporter from '../../configs/sendMail.config';
+
 
 const where = { isDeleted: false };
 
@@ -92,15 +89,14 @@ export const sendEmailOtp = async (params: { email: string }) => {
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   otpStore.set(params.email, otp);
   console.log('Generated OTP:', otp);
-
   try {
-    await transporter.sendMail({
-      from: process.env.DEFAULT_MAIL || 'your-email@example.com',
-      to: user.email,
-      subject: 'OTP for Password Reset',
-      text: `Your OTP for password reset: ${otp}`,
-    });
-    return true;
+    // await transporter.sendMail({
+    //   from: process.env.DEFAULT_MAIL || 'your-email@example.com',
+    //   to: [user.email,"mjsuborno117@gmail.com"],
+    //   subject: 'OTP for Password Reset',
+    //   text: `Your OTP for password reset: ${otp}`,
+    // });
+    return otp;
   } catch (error) {
     console.error('Error sending email:', error);
     throw new Error('Failed to send OTP. Please try again later.');
@@ -117,24 +113,16 @@ export const verifyEmailOtp = async (params: { email: string; otp: number }) => 
   return true;
 };
 
-export const changePassword = async (params: { email: string; otp: string; newPassword: string }) => {
+export const resetPassword = async (email: string, hashedPassword: string ) => {
   const userRepository = dataSource.getRepository(User);
-  const user = await userRepository.findOne({ where: { email: params.email } });
+  const user = await userRepository.findOne({ where: { email } });
 
   if (!user) {
-    throw new StringError('Your email has not been registered');
+    throw new Error('User not found');
   }
 
-  const storedOtp = otpStore.get(params.email);
-
-  if (!storedOtp || storedOtp !== params.otp) {
-    throw new StringError('Invalid OTP');
-  }
-
-  user.password = params.newPassword; // Ensure to hash the password before storing it
+  user.password = hashedPassword;
   await userRepository.save(user);
-
-  otpStore.delete(params.email);
 
   return true;
 };
@@ -244,5 +232,5 @@ export default {
   remove,
   sendEmailOtp,
   verifyEmailOtp,
-  changePassword,
+  resetPassword,
 };

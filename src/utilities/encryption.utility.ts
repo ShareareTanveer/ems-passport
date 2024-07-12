@@ -32,6 +32,13 @@ export default class Encryption {
       expiresIn: constants.APPLICATION.timers.userCookieExpiry,
     });
   };
+  static async generateResetPasswordCookie(key: string, value: string) {
+    const data: { [key: string]: string } = {};
+    data[key] = value;
+    return await jwt.sign({ data }, constants.APPLICATION.env.authSecret, {
+      expiresIn: constants.APPLICATION.timers.resetPasswordCookieExpiry,
+    });
+  };
 
   static async verifyCookie(token: string): Promise<any> {
     return new Promise((resolve) => {

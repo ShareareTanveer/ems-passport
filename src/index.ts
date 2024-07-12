@@ -11,11 +11,6 @@ dataSource
   .initialize()
   .then(async () => {
     logger.info('Connected to database successfully');
-    // try {
-    //       await generatePermissions()
-    //       await generateRoles()
-    // } catch (error) {
-    // }
     app.listen(PORT, () => {
       logger.info(`Server running at ${PORT}`);
     });

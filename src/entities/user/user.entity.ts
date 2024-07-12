@@ -1,4 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn, Unique, ManyToOne } from 'typeorm';
+import { IsEmail, IsNotEmpty, IsNumber,IsStrongPassword } from 'class-validator';
 
 // Entities
 import { BaseEntity } from '../base/base.entity';
@@ -15,6 +16,7 @@ export class User extends BaseEntity {
   email: string;
 
   @Column({ length: 100, nullable: false, select: false })
+  @IsStrongPassword()
   password: string;
 
   @Column({ length: 255, nullable: true })
