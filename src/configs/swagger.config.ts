@@ -21,6 +21,10 @@ const options: any = {
       {
         url: 'http://localhost:8000',
         description: 'Development server',
+      },      
+      {
+        url: 'https://ems-passport.onrender.com',
+        description: 'Production server',
       },
     ],
     components: {

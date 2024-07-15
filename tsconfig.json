@@ -12,16 +12,12 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "paths": {
-      "*": [
-        "node_modules/*",
-        "src/interfaces/*"
-      ]
+      "*": ["node_modules/*", "src/interfaces/*"]
     },
-    "lib": [
-      "es2015", "es5", "es6", "dom"
-    ]
+    "lib": ["es2015", "es5", "es6", "dom"]
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "src/migrations/1721037094790-seedInitial-data.ts"
   ]
 }

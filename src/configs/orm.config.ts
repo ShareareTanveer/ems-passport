@@ -16,7 +16,7 @@ const dataSource = new DataSource({
       : ['dist/**/*.entity.js'],
   logging: process.env.NODE_ENV !== 'production' ? ['query', 'error', 'schema', 'warn', 'info', 'log', 'migration'] : ['error'],
   subscribers: [],
-  // migrations: ['src/migrations/*.ts'],
+  migrations: ['src/migrations/*.ts'],
 });
 
 export default dataSource;
