@@ -144,7 +144,11 @@ export const verifyEmailOtp: IController = async (req, res) => {
     const cookie = await generateResetPasswordCookie(params.email)
     ApiResponse.deleteCookie(res, constants.COOKIE.COOKIE_OTP);
     ApiResponse.deleteCookie(res, constants.COOKIE.COOKIE_OTP_EMAIL);
-    return ApiResponse.result(res , { message: 'OTP verified successfully'}, httpStatusCodes.OK, cookie);
+    const data ={
+      message: 'OTP verified successfully',
+      accessToken: cookie.value
+    }
+    return ApiResponse.result(res , data, httpStatusCodes.OK, cookie);
 
   } catch (e) {
     console.error(e);
