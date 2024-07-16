@@ -268,7 +268,7 @@ router.post('/change-password', validateDTO(resetPasswordDTO), userController.re
 
 /**
  * @swagger
- * /logout:
+ * /auth/logout:
  *   post:
  *     tags:
  *       - Auth
