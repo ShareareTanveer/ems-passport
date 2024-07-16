@@ -162,12 +162,12 @@ export const resetPassword: IController = async (req, res) => {
     if (confirmNewPassword !== newPassword) {
       return ApiResponse.error(res, httpStatusCodes.BAD_REQUEST, 'Password does not match');
     }
-    const token = req.cookies.pending_user;
+    const authorizationHeader = ApiUtility.getCookieFromRequest(req, constants.COOKIE.COOKIE_RESET_PASSWORD);
     
-    if (!token) {
+    if (!authorizationHeader) {
       return ApiResponse.error(res, httpStatusCodes.UNAUTHORIZED, 'Invalid or expired token');
     }
-    const decoded: any = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded: any = jwt.verify(authorizationHeader, process.env.JWT_SECRET);
 
     if (!decoded || !decoded.data.pending_user) {
       return ApiResponse.error(res, httpStatusCodes.UNAUTHORIZED, 'Invalid or expired token');
@@ -178,6 +178,7 @@ export const resetPassword: IController = async (req, res) => {
 
     if (result) {
       ApiResponse.deleteCookie(res, constants.COOKIE.COOKIE_RESET_PASSWORD);
+      ApiResponse.deleteCookie(res, constants.COOKIE.COOKIE_USER);
       return ApiResponse.result(
         res,
         { message: 'Password reset successfully' },

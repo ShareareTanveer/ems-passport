@@ -3,7 +3,6 @@ import { checkPermission } from '../../middlewares/authenticate.middleware';
 import permissionController from '../../controllers/user/permission.controller';
 import { CreatePermissionDTO, UpdatePermissionDTO } from '../../services/dto/permission/create-update-permission.dto';
 import { validateDTO } from '../../middlewares/dto-validator.middleware';
-console.log("permission router")
 const router = express.Router();
 
 /**
