@@ -56,27 +56,26 @@ export default async (
 
 export const checkPermission = (action: string, modelName: string) => {
   return async (req: any, res: any, next: NextFunction) => {
-next()
-      // const userRepository = dataSource.getRepository(User);
-      // const permissionRepository = dataSource.getRepository(Permission);
-      // try {
-      //     const user = await userRepository.findOne({where:{id: req.user.id},relations:['role', 'role.permissions']});
-      //     if (!user) {
-      //         return res.status(403).json({ message: 'Unauthorized: User not found' });
-      //     }
-      //     const permission = await permissionRepository.findOne({ where: { codename: `${action}_${modelName}` } });
-      //     if (!permission) {
-      //         return res.status(403).json({ message: 'Unauthorized: Permission not found' });
-      //     }
-      //     const hasPermission = user.role.permissions.some(p => p.codename === `${action}_${modelName}`);
-      //     if (hasPermission) {
-      //         next();
-      //     } else {
-      //         res.status(403).json({ message: 'Unauthorized: Insufficient permissions' });
-      //     }
-      // } catch (error) {
-      //     console.error('Error checking permission:', error);
-      //     res.status(500).json({ message: 'Internal Server Error' });
-      // }
+    const userRepository = dataSource.getRepository(User);
+    const permissionRepository = dataSource.getRepository(Permission);
+    try {
+      const user = await userRepository.findOne({where:{id: req.user.id},relations:['role', 'role.permissions']});
+      if (!user) {
+        return res.status(403).json({ message: 'Unauthorized: User not found' });
+      }
+      const permission = await permissionRepository.findOne({ where: { codename: `${action}_${modelName}` } });
+      if (!permission) {
+        return res.status(403).json({ message: 'Unauthorized: Permission not found' });
+      }
+      const hasPermission = user.role.permissions.some(p => p.codename === `${action}_${modelName}`);
+      if (hasPermission) {
+        next();
+      } else {
+        return res.status(403).json({ message: 'Unauthorized: Insufficient permissions' });
+      }
+    } catch (error) {
+      console.error('Error checking permission:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
   };
 };

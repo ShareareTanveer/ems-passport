@@ -18,6 +18,5 @@
   },
   "include": [
     "src/**/*",
-    "src/migrations/1721037094790-seedInitial-data.ts"
   ]
 }
