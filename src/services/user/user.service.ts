@@ -103,12 +103,12 @@ export const sendEmailOtp = async (params: { email: string }) => {
   otpStore.set(params.email, otp);
   console.log('Generated OTP:', otp);
   try {
-    await transporter.sendMail({
-      from: process.env.DEFAULT_MAIL || 'your-email@example.com',
-      to: [user.email,"mjsuborno117@gmail.com"],
-      subject: 'OTP for Password Reset',
-      text: `Your OTP for password reset: ${otp}`,
-    });
+    // await transporter.sendMail({
+    //   from: process.env.DEFAULT_MAIL || 'your-email@example.com',
+    //   to: [user.email,"mjsuborno117@gmail.com"],
+    //   subject: 'OTP for Password Reset',
+    //   text: `Your OTP for password reset: ${otp}`,
+    // });
     return otp;
   } catch (error) {
     console.error('Error sending email:', error);
