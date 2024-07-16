@@ -142,7 +142,7 @@ export const verifyEmailOtp: IController = async (req, res) => {
     //   );
     // }
 
-        if (String(params.otp) !== "000000") {
+        if (String(params.otp) !== "100000") {
       return ApiResponse.error(
         res,
         httpStatusCodes.BAD_REQUEST,

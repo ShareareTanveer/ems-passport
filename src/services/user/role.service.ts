@@ -58,7 +58,6 @@ const create = async (params: ICreateRole): Promise<Role> => {
         const permissionEntities = await permissionRepository.findByIds(permissions);
         role.permissions = permissionEntities;
     }
-    console.log("users: " + users)
     if (users) {
         const userEntities = await userRepository.findByIds(users);
         console.log("userEntities",userEntities.length,userEntities)
