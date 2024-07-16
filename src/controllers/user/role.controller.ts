@@ -20,7 +20,7 @@ const create: IController = async (req, res) => {
     const params: ICreateRole = {
       name: req.body.name,
       permissions: req.body.permissions,
-      users: req.body.permissions,
+      users: req.body.users,
     }
     const role = await roleService.create(params);
     return ApiResponse.result(res, role, httpStatusCodes.CREATED);

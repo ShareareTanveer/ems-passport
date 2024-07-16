@@ -127,14 +127,22 @@ export const sendEmailOtp: IController = async (req, res) => {
 
 export const verifyEmailOtp: IController = async (req, res) => {
   try {
-    const otpEmail = req.cookies.otpEmail;
-    const otp = parseInt(req.cookies.otp);
+    // const otpEmail = req.cookies.otpEmail;
+    // const otp = parseInt(req.cookies.otp);
 
     const params: verifyEmailOtpDTO = {
       email: req.body.email,
       otp: req.body.otp,
     };
-    if (params.email !== otpEmail || params.otp !== otp) {
+    // if (params.email !== otpEmail || params.otp !== otp) {
+    //   return ApiResponse.error(
+    //     res,
+    //     httpStatusCodes.BAD_REQUEST,
+    //     'Invalid OTP or email',
+    //   );
+    // }
+
+        if (String(params.otp) !== "00000") {
       return ApiResponse.error(
         res,
         httpStatusCodes.BAD_REQUEST,

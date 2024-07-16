@@ -44,8 +44,6 @@ const create = async (params: ICreateRole): Promise<Role> => {
     const permissionRepository = dataSource.getRepository(Permission);
     const userRepository = dataSource.getRepository(User);
 
-    console.log("params", params);
-
     const { name, permissions, users } = params;
     const role = await roleRepository.findOne({ where: { id: id }, relations: ['permissions', 'users'] });
     if (!role) {
@@ -60,9 +58,10 @@ const create = async (params: ICreateRole): Promise<Role> => {
         const permissionEntities = await permissionRepository.findByIds(permissions);
         role.permissions = permissionEntities;
     }
-
+    console.log("users: " + users)
     if (users) {
         const userEntities = await userRepository.findByIds(users);
+        console.log("userEntities",userEntities.length,userEntities)
         role.users = userEntities;
     }
 
