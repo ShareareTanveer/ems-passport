@@ -123,7 +123,7 @@ router.post('/login',validateDTO(loginDTO), userController.login);
 
 /**
  * @swagger
- * /send-email-otp:
+ * /auth/send-email-otp:
  *   post:
  *     tags:
  *       - Auth 
@@ -161,7 +161,7 @@ router.post('/send-email-otp', validateDTO(sendEmailOtpDTO), userController.send
 
 /**
  * @swagger
- * /verify-email-otp:
+ * /auth/verify-email-otp:
  *   post:
  *     tags:
  *       - Auth
@@ -210,7 +210,7 @@ router.post('/verify-email-otp', validateDTO(verifyEmailOtpDTO), userController.
 
 /**
  * @swagger
- * /change-password:
+ * /auth/change-password:
  *   post:
  *     tags:
  *       - Auth
