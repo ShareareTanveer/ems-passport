@@ -75,8 +75,12 @@ const login: IController = async (req, res) => {
     };
     const user = await userService.login(params);
     const cookie:any= await generateUserCookie(user.id);
-    const access_token=cookie.user;
-    return ApiResponse.result(res, {access_token,...user}, httpStatusCodes.OK, cookie);
+    const access_token=cookie.value;
+    const data ={
+      access_token,
+      user
+    }
+    return ApiResponse.result(res, data, httpStatusCodes.OK, cookie);
   } catch (e) {
     if (e instanceof StringError) {
       return ApiResponse.error(
