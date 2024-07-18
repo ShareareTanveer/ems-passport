@@ -6,10 +6,11 @@ export default {
   },
   timers: {
     userCookieExpiry: '1d',
-    resetPasswordCookieExpiry: '10m',
+    resetPasswordCookieExpiry: '5m',
   },
   env: {
     authSecret: process.env.TOKEN_SECRET_KEY || 'test',
+    AUTH_PASSWORD_SECRET: process.env.AUTH_PASSWORD_SECRET || 'test',
   },
   authorizationIgnorePath: [
     '/',

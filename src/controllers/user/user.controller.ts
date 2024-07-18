@@ -35,6 +35,7 @@ import {
   verifyEmailOtpDTO,
 } from '../../services/dto/auth/auth.dto';
 import { RegisterUserDTO } from '../../services/dto/user/user.dto';
+import { generateOTP, verifyOTP } from '../../utilities/otp.utility';
 
 const create: IController = async (req, res) => {
   try {
@@ -74,12 +75,12 @@ const login: IController = async (req, res) => {
       password: req.body.password,
     };
     const user = await userService.login(params);
-    const cookie:any= await generateUserCookie(user.id);
-    const access_token=cookie.value;
-    const data ={
+    const cookie: any = await generateUserCookie(user.id);
+    const access_token = cookie.value;
+    const data = {
       access_token,
-      user
-    }
+      user,
+    };
     return ApiResponse.result(res, data, httpStatusCodes.OK, cookie);
   } catch (e) {
     if (e instanceof StringError) {
@@ -104,21 +105,13 @@ export const sendEmailOtp: IController = async (req, res) => {
       email: req.body.email,
     };
 
-    const otp = await userService.sendEmailOtp(params);
+    await userService.sendEmailOtp(params);
 
-    if (otp) {
-      const expiryDate = new Date(Date.now() + 2 * 60 * 1000);
-      res.cookie('otpEmail', params.email, {
-        expires: expiryDate,
-        httpOnly: true,
-      });
-      res.cookie('otp', otp, { expires: expiryDate, httpOnly: true });
-      return ApiResponse.result(
-        res,
-        { message: 'OTP sent successfully to your email' },
-        httpStatusCodes.OK,
-      );
-    }
+    return ApiResponse.result(
+      res,
+      { message: 'OTP sent successfully to your email' },
+      httpStatusCodes.OK,
+    );
   } catch (e) {
     console.error(e);
     return ApiResponse.error(res, 500, e.message);
@@ -127,65 +120,72 @@ export const sendEmailOtp: IController = async (req, res) => {
 
 export const verifyEmailOtp: IController = async (req, res) => {
   try {
-    // const otpEmail = req.cookies.otpEmail;
-    // const otp = parseInt(req.cookies.otp);
-
     const params: verifyEmailOtpDTO = {
       email: req.body.email,
       otp: req.body.otp,
     };
-    // if (params.email !== otpEmail || params.otp !== otp) {
-    //   return ApiResponse.error(
-    //     res,
-    //     httpStatusCodes.BAD_REQUEST,
-    //     'Invalid OTP or email',
-    //   );
-    // }
-
-        if (String(params.otp) !== "100000") {
-      return ApiResponse.error(
-        res,
-        httpStatusCodes.BAD_REQUEST,
-        'Invalid OTP or email',
-      );
-    }
-    const cookie = await generateResetPasswordCookie(params.email)
-    ApiResponse.deleteCookie(res, constants.COOKIE.COOKIE_OTP);
-    ApiResponse.deleteCookie(res, constants.COOKIE.COOKIE_OTP_EMAIL);
-    const data ={
+    const isValid = await verifyOTP(params.email, params.otp);
+    if (!isValid) {
+      return ApiResponse.error(res, 400, "Invalid or expired OTP");
+    } 
+    const cookie = await generateResetPasswordCookie(params.email);
+    const data = {
       message: 'OTP verified successfully',
-      accessToken: cookie.value
-    }
-    return ApiResponse.result(res , data, httpStatusCodes.OK, cookie);
-
+      accessToken: cookie.value,
+    };
+    return ApiResponse.result(res, data, httpStatusCodes.OK);
   } catch (e) {
-    console.error(e);
     return ApiResponse.error(res, 500, e.message);
   }
 };
 
 export const resetPassword: IController = async (req, res) => {
   try {
-    const { confirmNewPassword, newPassword }: resetPasswordDTO = req.body;
+    const { confirmNewPassword, newPassword }: resetPasswordDTO =
+      req.body;
     if (confirmNewPassword !== newPassword) {
-      return ApiResponse.error(res, httpStatusCodes.BAD_REQUEST, 'Password does not match');
+      return ApiResponse.error(
+        res,
+        httpStatusCodes.BAD_REQUEST,
+        'Password does not match',
+      );
     }
-    const authorizationHeader = ApiUtility.getCookieFromRequest(req, constants.COOKIE.COOKIE_RESET_PASSWORD);
-    
+    const authorizationHeader = ApiUtility.getCookieFromRequest(
+      req,
+      constants.COOKIE.COOKIE_RESET_PASSWORD,
+    );
+
     if (!authorizationHeader) {
-      return ApiResponse.error(res, httpStatusCodes.UNAUTHORIZED, 'Invalid or expired token');
+      return ApiResponse.error(
+        res,
+        httpStatusCodes.UNAUTHORIZED,
+        'Invalid or expired token',
+      );
     }
-    const decoded: any = jwt.verify(authorizationHeader, process.env.JWT_SECRET);
+    const decoded: any = jwt.verify(
+      authorizationHeader,
+      constants.APPLICATION.env.AUTH_PASSWORD_SECRET,
+    );
 
     if (!decoded || !decoded.data.pending_user) {
-      return ApiResponse.error(res, httpStatusCodes.UNAUTHORIZED, 'Invalid or expired token');
+      return ApiResponse.error(
+        res,
+        httpStatusCodes.UNAUTHORIZED,
+        'Invalid or expired token',
+      );
     }
-    const email = decoded.pending_user;
+    const email = decoded.data.pending_user;
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    const result = await userService.resetPassword(email, hashedPassword);
+    const result = await userService.resetPassword(
+      email,
+      hashedPassword,
+    );
 
     if (result) {
-      ApiResponse.deleteCookie(res, constants.COOKIE.COOKIE_RESET_PASSWORD);
+      ApiResponse.deleteCookie(
+        res,
+        constants.COOKIE.COOKIE_RESET_PASSWORD,
+      );
       ApiResponse.deleteCookie(res, constants.COOKIE.COOKIE_USER);
       return ApiResponse.result(
         res,
@@ -193,18 +193,29 @@ export const resetPassword: IController = async (req, res) => {
         httpStatusCodes.OK,
       );
     } else {
-      return ApiResponse.error(res, httpStatusCodes.BAD_REQUEST, 'Failed to reset password');
+      return ApiResponse.error(
+        res,
+        httpStatusCodes.BAD_REQUEST,
+        'Failed to reset password',
+      );
     }
   } catch (e) {
-    console.error(e);
-    return ApiResponse.error(res, httpStatusCodes.INTERNAL_SERVER_ERROR, e.message);
+    return ApiResponse.error(
+      res,
+      httpStatusCodes.INTERNAL_SERVER_ERROR,
+      e.message,
+    );
   }
 };
 
 const logout: IController = async (req, res) => {
   try {
-    ApiResponse.deleteCookie(res,constants.COOKIE.COOKIE_USER);
-    return ApiResponse.result(res, { message: 'Logged out' }, httpStatusCodes.OK);
+    ApiResponse.deleteCookie(res, constants.COOKIE.COOKIE_USER);
+    return ApiResponse.result(
+      res,
+      { message: 'Logged out' },
+      httpStatusCodes.OK,
+    );
   } catch (e) {
     ApiResponse.exception(res, e);
   }
@@ -304,7 +315,6 @@ const generateResetPasswordCookie = async (email: string) => {
     ),
   };
 };
-
 
 export default {
   create,

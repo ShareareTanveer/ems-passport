@@ -27,6 +27,7 @@ import transporter from '../../configs/sendMail.config';
 import { RegisterUserDTO } from '../dto/user/user.dto';
 import { UserDetail } from '../../entities/user/userDetails.entity';
 import { loginDTO } from '../dto/auth/auth.dto';
+import { generateOTP } from '../../utilities/otp.utility';
 
 
 const where = { isDeleted: false };
@@ -89,8 +90,6 @@ const login = async (params: loginDTO) => {
 };
 
 
-const otpStore = new Map<string, string>();
-
 export const sendEmailOtp = async (params: { email: string }) => {
   const userRepository = dataSource.getRepository(User);
   const user = await userRepository.findOne({ where: { email: params.email } });
@@ -99,13 +98,12 @@ export const sendEmailOtp = async (params: { email: string }) => {
     throw new StringError('Your email has not been registered');
   }
 
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  otpStore.set(params.email, otp);
-  console.log('Generated OTP:', otp);
+  const otp = await generateOTP(params.email)
+  console.log(otp)
   try {
     // await transporter.sendMail({
-    //   from: process.env.DEFAULT_MAIL || 'your-email@example.com',
-    //   to: [user.email,"mjsuborno117@gmail.com"],
+    //   from: process.env.DEFAULT_MAIL,
+    //   to: [user.email],
     //   subject: 'OTP for Password Reset',
     //   text: `Your OTP for password reset: ${otp}`,
     // });
@@ -117,26 +115,17 @@ export const sendEmailOtp = async (params: { email: string }) => {
 };
 
 export const verifyEmailOtp = async (params: { email: string; otp: number }) => {
-  const storedOtp = otpStore.get(params.email);
-
-  if (!storedOtp || storedOtp !== JSON.stringify(params.otp)) {
-    throw new StringError('Invalid OTP');
-  }
-
   return true;
 };
 
 export const resetPassword = async (email: string, hashedPassword: string ) => {
   const userRepository = dataSource.getRepository(User);
   const user = await userRepository.findOne({ where: { email } });
-
   if (!user) {
     throw new Error('User not found');
   }
-
   user.password = hashedPassword;
   await userRepository.save(user);
-
   return true;
 };
 

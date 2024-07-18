@@ -157,7 +157,7 @@ const router = express.Router();
  *         description: Internal server error
  */
 
-router.get('/me',checkPermission("read", "user"), userController.me);
+router.get('/me', userController.me);
 router.put('/me', validateDTO(MeDTO),userController.updateMe);
 
 router.get('/', checkPermission("read", "user"), userController.list);

@@ -1,7 +1,7 @@
 import { IsEmail,IsNotEmpty,IsNumber, IsOptional, IsStrongPassword } from 'class-validator';
 
 import { BaseDTO } from '../base.dto';
-import { EGender } from '../../../entities/enum/user.enum';
+import { EGender } from '../../../entities/enum/gender.enum';
 
 export class RegisterUserDTO extends BaseDTO {
     id?: number;

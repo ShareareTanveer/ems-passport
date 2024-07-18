@@ -35,7 +35,7 @@ export default class Encryption {
   static async generateResetPasswordCookie(key: string, value: string) {
     const data: { [key: string]: string } = {};
     data[key] = value;
-    return await jwt.sign({ data }, constants.APPLICATION.env.authSecret, {
+    return await jwt.sign({ data }, constants.APPLICATION.env.AUTH_PASSWORD_SECRET, {
       expiresIn: constants.APPLICATION.timers.resetPasswordCookieExpiry,
     });
   };

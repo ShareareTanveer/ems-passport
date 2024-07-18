@@ -9,7 +9,7 @@ const dataSource = new DataSource({
   database: process.env.DB_NAME || 'freedb_emspassportdb',
   port: parseInt(process.env.DB_PORT || '3306', 10),
   charset: 'utf8',
-  // synchronize: true,
+  synchronize: true,
   entities:
     process.env.NODE_ENV !== 'production'
       ? ['src/**/*.entity.ts']

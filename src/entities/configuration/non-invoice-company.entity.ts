@@ -1,29 +1,30 @@
 import { IsPhoneNumber, IsString } from 'class-validator';
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { BaseEntity } from '../base/base.entity';
 
-@Entity()
-export class NonInvoiceCompany {
-    @PrimaryGeneratedColumn()
+@Entity({ name: 'non_invoice_company' })
+export class NonInvoiceCompany extends BaseEntity {
+    @PrimaryGeneratedColumn({ type: 'int' })
     id: number;
 
-    @Column()
+    @Column({ type: 'varchar', length: 255, nullable: false })
     @IsString()
     companyName: string;
 
-    @Column()
+    @Column({ type: 'varchar', length: 255, nullable: false })
     @IsString()
     companyContactPerson: string;
 
-    @Column()
+    @Column({ type: 'varchar', length: 100, nullable: false })
     @IsString()
     designation: string;
 
-    @Column()
+    @Column({ type: 'varchar', length: 15, nullable: false })
     @IsString()
-    @IsPhoneNumber()
+    @IsPhoneNumber(null)
     phone: string;
 
-    @Column()
+    @Column({ type: 'text', nullable: false })
     @IsString()
     address: string;
 }

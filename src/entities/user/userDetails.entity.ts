@@ -1,11 +1,20 @@
-import { Column, Entity, PrimaryGeneratedColumn, OneToOne, JoinColumn } from 'typeorm';
-import { IsPhoneNumber, IsOptional, IsEnum, Length, IsString, IsNotEmpty } from 'class-validator';
-import { Exclude, Expose, Type } from 'class-transformer';
-
-import { EGender } from '../enum/user.enum';
-
-import { User } from './user.entity';
-
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
+import {
+  IsPhoneNumber,
+  IsOptional,
+  IsEnum,
+  Length,
+  IsString,
+  IsNotEmpty,
+  IsDate,
+} from 'class-validator';
+import { EGender } from '../enum/gender.enum';
 
 @Entity('user_details', { orderBy: { id: 'DESC' } })
 export class UserDetail {
@@ -37,5 +46,8 @@ export class UserDetail {
   @IsNotEmpty()
   @IsEnum(EGender, { message: 'Gender must be Male, Female, or Other' })
   gender: EGender;
-  
+
+  // @Column({ type: 'date', nullable: false })
+  // @IsDate()
+  // birthDate: Date;
 }

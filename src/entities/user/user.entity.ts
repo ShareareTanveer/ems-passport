@@ -33,8 +33,8 @@ export class User extends BaseEntity {
   @ManyToOne(() => Role, role => role.users)
   role: Role;
 
-
   @OneToOne(() => UserDetail)
   @JoinColumn()
   details: UserDetail
+
 }
